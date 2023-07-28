@@ -1,0 +1,7 @@
+.dockerignore
+.git*
+.idea/
+.vim/
+allure-*/
+Dockerfile
+README.md

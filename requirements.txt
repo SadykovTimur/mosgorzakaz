@@ -1,0 +1,6 @@
+python >= 3.10
+selenium == 4.4.3
+webdriver-manager >= 3.8.3
+pytest >= 7.1.2
+allure-pytest >= 2.9.45
+git+https://gitlab.coms.ru/qa/ui.git@master
