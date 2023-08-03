@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from coms.qa.core.helpers import wait_for
 from coms.qa.frontend.pages import Page
-from coms.qa.frontend.pages.component import Component
+from coms.qa.frontend.pages.component import Component, Components
 from coms.qa.frontend.pages.component.button import Button
 from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
@@ -10,12 +10,15 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 from dit.qa.pages.main_page.components.add_object_aip import AddObjectAIP
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
 from dit.qa.pages.main_page.components.footer import Footer
+from dit.qa.pages.main_page.components.inventory_payment_invoice import InventoryPaymentInvoice
+from dit.qa.pages.main_page.components.inventory_payment_invoices import InventoryPaymentInvoices
 from dit.qa.pages.main_page.components.main_menu import MainMenu
 from dit.qa.pages.main_page.components.news import News
 from dit.qa.pages.main_page.components.object_aip import ObjectAIP
 from dit.qa.pages.main_page.components.object_register_aip import ObjectRegisterAIP
 from dit.qa.pages.main_page.components.organization import Organization
 from dit.qa.pages.main_page.components.organizations import Organizations
+from dit.qa.pages.main_page.components.payment import Payment
 from dit.qa.pages.main_page.components.update_message import UpdateMessage
 
 __all__ = ['MainPage']
@@ -47,6 +50,23 @@ class MainPage(Page):
     )
     object_aip_tab = Component(xpath='//span[contains(text(), "Объект АИП"]')
     object_aip = ObjectAIP(css='[data-testid="Объект АИП"]')
+    inventory_payment_invoices_tab = Component(xpath='//span[text()="Описи счетов на оплату"]')
+    inventory_payment_invoices = InventoryPaymentInvoices(css='[data-testid="Описи счетов на оплату"]')
+    inventory_payment_invoice_modal = InventoryPaymentInvoice(
+        xpath='//div[text()="Опись счетов на оплату"]/ancestor::div[contains(@class,"x-window ")]'
+    )
+    payment_modal = Payment(xpath='//div[text()="Платеж"]/ancestor::div[contains(@class,"x-window ")]')
+    loaders = Components(class_name='x-mask-msg-text')
+
+    def is_loaders_hidden(self) -> bool:
+        try:
+            for loader in self.loaders:
+                if loader.visible:
+                    return False
+
+            return True
+        except NoSuchElementException:
+            return True
 
     @property
     def is_news_modal_hide(self) -> bool:
@@ -77,6 +97,7 @@ class MainPage(Page):
     def wait_for_loading(self, login: str) -> None:
         def condition() -> bool:
             try:
+                assert self.is_loaders_hidden()
                 assert self.main_menu_btn.visible
                 assert self.desktop_tab.visible
                 assert self.user_name == login
@@ -103,6 +124,7 @@ class MainPage(Page):
     def wait_organizations_for_loading(self, login: str) -> None:
         def condition() -> bool:
             try:
+                assert self.is_loaders_hidden()
                 assert self.main_menu_btn.visible
                 assert self.desktop_tab.visible
                 assert self.organizations_tab.visible
@@ -128,6 +150,7 @@ class MainPage(Page):
     def wait_object_register_aip_for_loading(self, login: str) -> None:
         def condition() -> bool:
             try:
+                assert self.is_loaders_hidden()
                 assert self.main_menu_btn.visible
                 assert self.desktop_tab.visible
                 assert self.object_register_aip_tab.visible
@@ -174,4 +197,42 @@ class MainPage(Page):
 
         self.app.set_implicitly_wait(1)
         wait_for(condition, msg='Modal was not closed')
+        self.app.restore_implicitly_wait()
+
+    def wait_for_inventory_payment_invoice_modal_closed(self) -> None:
+        def condition() -> bool:
+            try:
+                return not self.inventory_payment_invoice_modal.visible
+            except (NoSuchElementException, StaleElementReferenceException):
+                return True
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Modal was not closed')
+        self.app.restore_implicitly_wait()
+
+    def wait_inventory_payment_invoices_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.inventory_payment_invoices_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.inventory_payment_invoices.tops[-1].visible
+                assert self.inventory_payment_invoices.head.visible
+                assert self.inventory_payment_invoices.body.visible
+                assert self.inventory_payment_invoices.bottom.visible
+
+                return self.inventory_payment_invoices.filter_btn.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
         self.app.restore_implicitly_wait()

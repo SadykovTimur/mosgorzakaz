@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dit-qa-mosgorzakaz"
-version = "0.1.0"
+version = "0.1.1"
 description = "Autotests for Mosgorzakaz"
 authors = ["Seregin Andrey <a.seregin@coms.ru>"]
 

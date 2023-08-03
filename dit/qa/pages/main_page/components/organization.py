@@ -1,27 +1,11 @@
-from typing import List
-
 from coms.qa.core.helpers import wait_for
-from coms.qa.frontend.pages.component import Component, Components, ComponentWrapper
+from coms.qa.frontend.pages.component import Component, ComponentWrapper
 from coms.qa.frontend.pages.component.button import Button
-from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException
 
+from dit.qa.pages.main_page.components.fields import Fields
+
 __all__ = ['Organization']
-
-
-class FieldWrapper(ComponentWrapper):
-    label = Text(css='[class*="x-form-item-label"]')
-    value_field = Component(tag='input')
-
-
-class Fields(Components):
-    def __get__(self, instance, owner) -> List[FieldWrapper]:
-        ret: List[FieldWrapper] = []
-
-        for webelement in self.finds(instance):
-            ret.append(FieldWrapper(instance.app, webelement, self._locator))
-
-        return ret
 
 
 class OrganizationWrapper(ComponentWrapper):

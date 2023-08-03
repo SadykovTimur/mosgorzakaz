@@ -15,11 +15,16 @@ __all__ = [
     'open_organization_modal',
     'open_add_object_aip_modal',
     'close_add_object_aip_modal',
+    'find_inventory_invoices',
+    'open_add_inventory_invoice_modal',
+    'open_edit_inventory_invoice_modal',
+    'open_payment_modal',
     'open_object_aip',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
     'wait_registry_object_aip_tab',
+    'wait_inventory_payment_invoices_tab',
 ]
 
 
@@ -59,6 +64,73 @@ def open_section(app: Application, menu_name: str = 'Справочники', su
         main_menu.wait_for_loading()
 
         main_menu.submenu.choose_item(submenu_name)
+
+
+def find_inventory_invoices(app: Application, number: int = 4268, summ: int = 21736748800) -> None:
+    with allure.step('Finding inventory invoices'):
+        tab = MainPage(app).inventory_payment_invoices
+
+        try:
+            tab.expand_filter_form()
+            tab.filter_form.fill_filter({'Номер описи': number, 'Сумма по описи к оплате': summ})
+            tab.filter_form.submit.wait_for_clickability().click()
+            tab.body.check_found_inventories(number, summ)
+
+            screenshot_attach(app, 'inventory_invoices')
+        except Exception as e:
+            screenshot_attach(app, 'inventory_invoices_error')
+
+            raise TimeoutError('Inventory invoices was not found') from e
+
+
+def open_add_inventory_invoice_modal(app: Application) -> None:
+    with allure.step('Opening add inventory invoice'):
+        page = MainPage(app)
+
+        try:
+            page.inventory_payment_invoices.tops[-1].add.wait_for_clickability().click()
+            page.inventory_payment_invoice_modal.wait_for_loading()
+
+            screenshot_attach(app, 'inventory_invoice_modal')
+        except Exception as e:
+            screenshot_attach(app, 'inventory_invoice_modal_error')
+
+            raise TimeoutError('Inventory invoice modal was not loaded') from e
+
+        page.inventory_payment_invoice_modal.close.wait_for_clickability().click()
+        page.wait_for_inventory_payment_invoice_modal_closed()
+
+
+def open_edit_inventory_invoice_modal(app: Application) -> None:
+    with allure.step('Opening edit inventory invoice'):
+        page = MainPage(app)
+
+        try:
+            page.inventory_payment_invoices.body.rows[0].edit.wait_for_clickability().click()
+            page.inventory_payment_invoice_modal.wait_for_loading(False)
+
+            screenshot_attach(app, 'inventory_invoice_modal')
+        except Exception as e:
+            screenshot_attach(app, 'inventory_invoice_modal_error')
+
+            raise TimeoutError('Inventory invoice modal was not loaded') from e
+
+
+def open_payment_modal(app: Application) -> None:
+    with allure.step('Opening payment'):
+        page = MainPage(app)
+
+        try:
+            invoice = page.inventory_payment_invoice_modal.invoices[0]
+            invoice.wait_for_clickability()
+            invoice.webelement.click()
+            page.payment_modal.wait_for_loading()
+
+            screenshot_attach(app, 'payment_modal')
+        except Exception as e:
+            screenshot_attach(app, 'payment_modal_error')
+
+            raise TimeoutError('Payment modal was not loaded') from e
 
 
 def open_org_form_modal(app: Application) -> None:
@@ -184,3 +256,15 @@ def wait_registry_object_aip_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'registry_object_aip_tab_error')
 
             raise TimeoutError('Registry object aip tab was not loaded') from e
+
+
+def wait_inventory_payment_invoices_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Inventory payment invoices tab'):
+        try:
+            MainPage(app).wait_inventory_payment_invoices_for_loading(login)
+
+            screenshot_attach(app, 'inventory_payment_invoices_tab')
+        except Exception as e:
+            screenshot_attach(app, 'inventory_payment_invoices_tab_error')
+
+            raise TimeoutError('Inventory payment invoices tab was not loaded') from e
