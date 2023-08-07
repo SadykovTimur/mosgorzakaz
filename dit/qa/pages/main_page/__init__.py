@@ -7,18 +7,20 @@ from coms.qa.frontend.pages.component.button import Button
 from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
-from dit.qa.pages.main_page.components.add_object_aip import AddObjectAIP
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
 from dit.qa.pages.main_page.components.footer import Footer
-from dit.qa.pages.main_page.components.inventory_payment_invoice import InventoryPaymentInvoice
-from dit.qa.pages.main_page.components.inventory_payment_invoices import InventoryPaymentInvoices
+from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoice import InventoryPaymentInvoice
+from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoices import InventoryPaymentInvoices
+from dit.qa.pages.main_page.components.inventory_payment.payment import Payment
 from dit.qa.pages.main_page.components.main_menu import MainMenu
 from dit.qa.pages.main_page.components.news import News
-from dit.qa.pages.main_page.components.object_aip import ObjectAIP
-from dit.qa.pages.main_page.components.object_register_aip import ObjectRegisterAIP
-from dit.qa.pages.main_page.components.organization import Organization
-from dit.qa.pages.main_page.components.organizations import Organizations
-from dit.qa.pages.main_page.components.payment import Payment
+from dit.qa.pages.main_page.components.objects_aip.add_object_aip import AddObjectAIP
+from dit.qa.pages.main_page.components.objects_aip.object_aip import ObjectAIP
+from dit.qa.pages.main_page.components.objects_aip.object_register_aip import ObjectRegisterAIP
+from dit.qa.pages.main_page.components.organization.organization import Organization
+from dit.qa.pages.main_page.components.organization.organizations import Organizations
+from dit.qa.pages.main_page.components.reports.reports import Reports, ReportsMenu
+from dit.qa.pages.main_page.components.reports.reports_queue import ReportsQueue
 from dit.qa.pages.main_page.components.update_message import UpdateMessage
 
 __all__ = ['MainPage']
@@ -56,7 +58,12 @@ class MainPage(Page):
         xpath='//div[text()="Опись счетов на оплату"]/ancestor::div[contains(@class,"x-window ")]'
     )
     payment_modal = Payment(xpath='//div[text()="Платеж"]/ancestor::div[contains(@class,"x-window ")]')
-    loaders = Components(class_name='x-mask-msg-text')
+    loaders = Components(css='[class*="mask-loading"]')
+    reports_tab = Component(xpath='//span[text()="Отчёты по показателям"]')
+    reports = Reports(css='[data-testid="Отчёты по показателям"]')
+    reports_queue_tab = Component(xpath='//span[text()="Очередь отчетов"]')
+    reports_queue = ReportsQueue(css='[data-testid="Очередь отчетов"]')
+    reports_menu = ReportsMenu(class_name='x3-menu-list')
 
     def is_loaders_hidden(self) -> bool:
         try:
@@ -235,4 +242,83 @@ class MainPage(Page):
 
         self.app.set_implicitly_wait(1)
         wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_reports_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.reports_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.reports.tops[-1].visible
+                assert self.reports.header.visible
+                assert self.reports.body.visible
+                assert self.reports.bottom.visible
+
+                return self.reports.filter_btn.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_reports_queue_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.reports_queue_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.reports_queue.top.visible
+                assert self.reports_queue.header.visible
+                assert self.reports_queue.body.visible
+
+                return self.reports_queue.bottom.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_loader_is_hidden(self) -> None:
+        def condition() -> bool:
+            try:
+                return self.is_loaders_hidden()
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Loader was not hidden')
+        self.app.restore_implicitly_wait()
+
+    def wait_for_loading_reports_menu(self) -> None:
+        def condition() -> bool:
+            try:
+                assert self.reports_menu.visible
+
+                return len(self.reports_menu.items) > 0
+            except NoSuchElementException:
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Reports menu was not loaded')
         self.app.restore_implicitly_wait()
