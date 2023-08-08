@@ -3,12 +3,17 @@ from typing import List
 from coms.qa.frontend.pages.component import Component, Components, ComponentWrapper
 from coms.qa.frontend.pages.component.text import Text
 
-__all__ = ['Fields']
+__all__ = ['Fields', 'Field']
 
 
 class FieldWrapper(ComponentWrapper):
     label = Text(css='[class*="x-form-item-label"]')
     value_field = Component(tag='input')
+
+
+class Field(Component):
+    def __get__(self, instance, owner) -> FieldWrapper:
+        return FieldWrapper(instance.app, self.find(instance), self._locator)
 
 
 class Fields(Components):

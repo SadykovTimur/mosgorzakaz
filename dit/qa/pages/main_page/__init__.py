@@ -8,6 +8,9 @@ from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
+from dit.qa.pages.main_page.components.drop_down_menu import DropDownMenus
+from dit.qa.pages.main_page.components.financing_objects.financing_objects import FinancingObjects
+from dit.qa.pages.main_page.components.financing_objects.financing_report_params import FinancingReportParams
 from dit.qa.pages.main_page.components.footer import Footer
 from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoice import InventoryPaymentInvoice
 from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoices import InventoryPaymentInvoices
@@ -64,6 +67,12 @@ class MainPage(Page):
     reports_queue_tab = Component(xpath='//span[text()="Очередь отчетов"]')
     reports_queue = ReportsQueue(css='[data-testid="Очередь отчетов"]')
     reports_menu = ReportsMenu(class_name='x3-menu-list')
+    financing_objects_tab = Component(xpath='//span[text()="Объекты финансирования"]')
+    financing_objects = FinancingObjects(css='[data-testid="Объекты финансирования"]')
+    drop_down_menus = DropDownMenus(css='[class*="x-menu-body"]')
+    financing_report_params_modal = FinancingReportParams(
+        xpath='//div[text()="Параметры отчёта"]/ancestor::div[contains(@class, "x-window ")]'
+    )
 
     def is_loaders_hidden(self) -> bool:
         try:
@@ -321,4 +330,31 @@ class MainPage(Page):
 
         self.app.set_implicitly_wait(1)
         wait_for(condition, msg='Reports menu was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_financial_objects_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.financing_objects_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.financing_objects.tops[-1].visible
+                assert self.financing_objects.header.visible
+                assert self.financing_objects.body.visible
+                assert self.financing_objects.bottom.visible
+
+                return self.financing_objects.filter_btn.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
         self.app.restore_implicitly_wait()

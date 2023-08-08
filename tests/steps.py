@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import allure
+from coms.qa.core.helpers import wait_for
 from coms.qa.fixtures.application import Application
 from coms.qa.frontend.helpers.attach_helper import screenshot_attach
 from selenium.common.exceptions import NoSuchElementException
@@ -23,6 +24,8 @@ __all__ = [
     'open_edit_inventory_invoice_modal',
     'open_payment_modal',
     'open_object_aip',
+    'open_report_params',
+    'fill_report_params',
     'choose_report',
     'check_download_report',
     'wait_auth_page',
@@ -31,6 +34,8 @@ __all__ = [
     'wait_registry_object_aip_tab',
     'wait_inventory_payment_invoices_tab',
     'wait_reports_tab',
+    'wait_financial_objects_tab',
+    'wait_for_downloading_report',
 ]
 
 
@@ -216,6 +221,46 @@ def open_object_aip(app: Application) -> None:
             raise TimeoutError('Object aip was not loaded') from e
 
 
+def open_report_params(app: Application) -> None:
+    with allure.step('Opening report params modal'):
+        page = MainPage(app)
+
+        try:
+            page.financing_objects.tops[-1].reports.click()
+            app.move_to_element(page.drop_down_menus[-1].choose_item('Сводный отчет с ТДЦ').webelement)
+
+            all_fields = page.drop_down_menus[-1].choose_item('Все поля')
+            all_fields.wait_for_clickability()
+            all_fields.webelement.click()
+
+            page.financing_report_params_modal.wait_for_loading()
+
+            screenshot_attach(app, 'report_params')
+        except Exception as e:
+            screenshot_attach(app, 'report_params_error')
+
+            raise TimeoutError('Report params modal was not loaded') from e
+
+
+def fill_report_params(app: Application, params: dict) -> None:
+    with allure.step('Filling report params modal'):
+        modal = MainPage(app).financing_report_params_modal
+
+        try:
+            for key, value in params.items():
+                modal.fill_field(key, value)
+
+            modal.wait_for_loading(params=params)
+
+            screenshot_attach(app, 'report_params')
+        except Exception as e:
+            screenshot_attach(app, 'report_params_error')
+
+            raise TimeoutError('Report params was not filled') from e
+
+        modal.print.click()
+
+
 def choose_report(
     app: Application, login: str, report_name: str = '190314', report_type: str = 'MS Excel 2007'
 ) -> None:
@@ -328,3 +373,37 @@ def wait_reports_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'reports_tab_error')
 
             raise TimeoutError('Reports tab was not loaded') from e
+
+
+def wait_financial_objects_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Financial objects tab'):
+        try:
+            MainPage(app).wait_financial_objects_for_loading(login)
+
+            screenshot_attach(app, 'financial_objects_tab')
+        except Exception as e:
+            screenshot_attach(app, 'financial_objects_tab_error')
+
+            raise TimeoutError('Financial objects tab was not loaded') from e
+
+
+def wait_for_downloading_report(app: Application) -> None:
+    with allure.step('Wait for downloading Financial report'):
+        page = MainPage(app)
+        try:
+            wait_browser_tabs(app, 2)
+            wait_browser_tabs(app, 1)
+            page.financing_report_params_modal.wait_for_invisibility()
+
+            screenshot_attach(app, 'financial_report')
+        except Exception as e:
+            screenshot_attach(app, 'financial_report_error')
+
+            raise TimeoutError('Financial report was not downloaded') from e
+
+
+def wait_browser_tabs(app: Application, tabs: int) -> None:
+    def condition() -> bool:
+        return len(app.driver.window_handles) == tabs
+
+    wait_for(condition, msg='Tabs was not loaded')
