@@ -28,6 +28,8 @@ __all__ = [
     'fill_report_params',
     'choose_report',
     'check_download_report',
+    'choose_program',
+    'choose_subprogram',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
@@ -36,6 +38,7 @@ __all__ = [
     'wait_reports_tab',
     'wait_financial_objects_tab',
     'wait_for_downloading_report',
+    'wait_arm_aip_tab',
 ]
 
 
@@ -303,6 +306,39 @@ def check_download_report(app: Application, report_date: datetime) -> None:
             raise TimeoutError('Downloading report was not finished') from e
 
 
+def choose_program(
+    app: Application,
+    login: str,
+) -> None:
+    with allure.step('Choosing arm program'):
+        page = MainPage(app)
+
+        try:
+            program_name = page.arm_aip.bodys[0].choose_first_item()
+            page.wait_arm_aip_program_for_loading(login, program_name)
+
+            screenshot_attach(app, 'program')
+        except Exception as e:
+            screenshot_attach(app, 'program_error')
+
+            raise TimeoutError('Program was not loaded') from e
+
+
+def choose_subprogram(app: Application, login: str) -> None:
+    with allure.step('Choosing arm subprogram'):
+        page = MainPage(app)
+
+        try:
+            subprogram_name = page.arm_aip.bodys[1].choose_first_item()
+            page.wait_arm_aip_subprogram_for_loading(login, subprogram_name)
+
+            screenshot_attach(app, 'subprogram')
+        except Exception as e:
+            screenshot_attach(app, 'subprogram_error')
+
+            raise TimeoutError('Subprogram was not loaded') from e
+
+
 def wait_auth_page(app: Application) -> None:
     with allure.step('Wait for loading Auth page'):
         try:
@@ -407,3 +443,15 @@ def wait_browser_tabs(app: Application, tabs: int) -> None:
         return len(app.driver.window_handles) == tabs
 
     wait_for(condition, msg='Tabs was not loaded')
+
+
+def wait_arm_aip_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading ARM AIP tab'):
+        try:
+            MainPage(app).wait_arm_aip_for_loading(login)
+
+            screenshot_attach(app, 'arm_aip_tab')
+        except Exception as e:
+            screenshot_attach(app, 'arm_aip_tab_error')
+
+            raise TimeoutError('ARM AIP tab was not loaded') from e

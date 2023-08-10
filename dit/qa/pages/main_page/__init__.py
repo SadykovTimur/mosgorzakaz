@@ -7,6 +7,7 @@ from coms.qa.frontend.pages.component.button import Button
 from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
+from dit.qa.pages.main_page.components.arm_aip.arm_aip import ARMAIP
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
 from dit.qa.pages.main_page.components.drop_down_menu import DropDownMenus
 from dit.qa.pages.main_page.components.financing_objects.financing_objects import FinancingObjects
@@ -73,6 +74,8 @@ class MainPage(Page):
     financing_report_params_modal = FinancingReportParams(
         xpath='//div[text()="Параметры отчёта"]/ancestor::div[contains(@class, "x-window ")]'
     )
+    arm_aip_tab = Component(xpath='//span[text()="Рабочее место руководителя (АИП)"]')
+    arm_aip = ARMAIP(css='[data-testid="Рабочее место руководителя (АИП)"]')
 
     def is_loaders_hidden(self) -> bool:
         try:
@@ -350,6 +353,138 @@ class MainPage(Page):
                 assert self.financing_objects.bottom.visible
 
                 return self.financing_objects.filter_btn.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_arm_aip_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.arm_aip_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.arm_aip.panel.finance.visible
+                assert self.arm_aip.panel.year.visible
+                assert self.arm_aip.panel.objects.visible
+                assert self.arm_aip.panel.prefectures.visible
+                assert self.arm_aip.panel.developer.visible
+                assert self.arm_aip.panel.financing.visible
+                assert self.arm_aip.panel.aip.visible
+                assert self.arm_aip.panel.column_chart.visible
+                assert self.arm_aip.panel.pie_chart.visible
+                assert self.arm_aip.panel.search.visible
+                assert self.arm_aip.panel.excel.visible
+                assert self.arm_aip.panel.map.visible
+                assert self.arm_aip.panel.reset_filters.visible
+
+                assert self.arm_aip.headers[0].visible
+                assert self.arm_aip.bodys[0].visible
+
+                return self.arm_aip.bodys[0].rows[0].visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_arm_aip_program_for_loading(self, login: str, program_name: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.arm_aip_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.arm_aip.panel.finance.visible
+                assert self.arm_aip.panel.year.visible
+                assert self.arm_aip.panel.objects.visible
+                assert self.arm_aip.panel.prefectures.visible
+                assert self.arm_aip.panel.developer.visible
+                assert self.arm_aip.panel.financing.visible
+                assert self.arm_aip.panel.aip.visible
+                assert self.arm_aip.panel.search.visible
+                assert self.arm_aip.panel.map.visible
+                assert self.arm_aip.panel.reset_filters.visible
+                assert self.arm_aip.panel.back_btn.visible
+
+                assert self.arm_aip.headers[1].visible
+                assert self.arm_aip.bodys[1].visible
+                assert self.arm_aip.bodys[1].rows[0].visible
+
+                assert self.arm_aip.titles[-1].webelement.text == program_name
+                assert self.arm_aip.object_state[-1].visible
+                assert self.arm_aip.object_state[-1].chart.visible
+                assert self.arm_aip.exec_and_payment[-1].visible
+
+                return self.arm_aip.exec_and_payment[-1].chart.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_arm_aip_subprogram_for_loading(self, login: str, subprogram_name: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.arm_aip_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.arm_aip.panel.finance.visible
+                assert self.arm_aip.panel.year.visible
+                assert self.arm_aip.panel.objects.visible
+                assert self.arm_aip.panel.prefectures.visible
+                assert self.arm_aip.panel.developer.visible
+                assert self.arm_aip.panel.financing.visible
+                assert self.arm_aip.panel.aip.visible
+                assert self.arm_aip.panel.search.visible
+                assert self.arm_aip.panel.map.visible
+                assert self.arm_aip.panel.reset_filters.visible
+                assert self.arm_aip.panel.back_btn.visible
+
+                assert self.arm_aip.headers[2].visible
+                assert self.arm_aip.bodys[2].visible
+                assert self.arm_aip.bodys[2].rows[0].visible
+
+                assert self.arm_aip.titles[-1].webelement.text == subprogram_name
+                assert self.arm_aip.object_state[-1].visible
+                assert self.arm_aip.object_state[-1].chart.visible
+                assert self.arm_aip.exec_and_payment[-1].visible
+                assert self.arm_aip.exec_and_payment[-1].chart.visible
+
+                assert self.arm_aip.objects_panel.aip.visible
+                assert self.arm_aip.objects_panel.search.visible
+                assert self.arm_aip.objects_panel.object_state.visible
+
+                assert self.arm_aip.objects_body.visible
+
+                return self.arm_aip.objects_body.rows[0].visible
 
             except NoSuchElementException:
 
