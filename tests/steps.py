@@ -25,11 +25,14 @@ __all__ = [
     'open_payment_modal',
     'open_object_aip',
     'open_report_params',
+    'open_choose_element',
+    'open_add_property_object',
     'fill_report_params',
     'choose_report',
     'check_download_report',
     'choose_program',
     'choose_subprogram',
+    'choose_element',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
@@ -39,6 +42,7 @@ __all__ = [
     'wait_financial_objects_tab',
     'wait_for_downloading_report',
     'wait_arm_aip_tab',
+    'wait_balance_transfer_tab',
 ]
 
 
@@ -339,6 +343,54 @@ def choose_subprogram(app: Application, login: str) -> None:
             raise TimeoutError('Subprogram was not loaded') from e
 
 
+def choose_element(app: Application, field_name: str, element_name: str) -> None:
+    with allure.step('Choosing element'):
+        page = MainPage(app)
+
+        try:
+            modal = page.choose_element_modal[-1]
+            modal.search_element(element_name)
+            modal.body.choose_item(element_name)
+            modal.choose.click()
+            page.add_oi_modal.wait_for_filling(field_name, element_name)
+
+            screenshot_attach(app, 'choose_element')
+        except Exception as e:
+            screenshot_attach(app, 'choose_element_error')
+
+            raise TimeoutError('Choose element was not loaded') from e
+
+
+def open_add_property_object(app: Application) -> None:
+    with allure.step('Opening Add property object modal'):
+        page = MainPage(app)
+
+        try:
+            page.balance_transfer_arm.panel.create_oi.click()
+            page.add_oi_modal.wait_for_loading()
+
+            screenshot_attach(app, 'add_property_object_modal')
+        except Exception as e:
+            screenshot_attach(app, 'add_property_object_modal_error')
+
+            raise TimeoutError('Add property object modal was not loaded') from e
+
+
+def open_choose_element(app: Application, field_name: str) -> None:
+    with allure.step('Opening Choose element modal'):
+        page = MainPage(app)
+
+        try:
+            page.add_oi_modal.choose_field(field_name).search.click()
+            page.choose_element_modal[-1].wait_for_loading()
+
+            screenshot_attach(app, 'choose_element_modal')
+        except Exception as e:
+            screenshot_attach(app, 'choose_element_modal_error')
+
+            raise TimeoutError('Choose element modal was not loaded') from e
+
+
 def wait_auth_page(app: Application) -> None:
     with allure.step('Wait for loading Auth page'):
         try:
@@ -455,3 +507,15 @@ def wait_arm_aip_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'arm_aip_tab_error')
 
             raise TimeoutError('ARM AIP tab was not loaded') from e
+
+
+def wait_balance_transfer_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Balance transfer ARM tab'):
+        try:
+            MainPage(app).wait_balance_transfer_arm_for_loading(login)
+
+            screenshot_attach(app, 'balance_transfer_arm_tab')
+        except Exception as e:
+            screenshot_attach(app, 'balance_transfer_arm_tab_error')
+
+            raise TimeoutError('Balance transfer ARM tab was not loaded') from e

@@ -8,6 +8,9 @@ from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 from dit.qa.pages.main_page.components.arm_aip.arm_aip import ARMAIP
+from dit.qa.pages.main_page.components.balance_transfer_arm.add_oi import AddOI
+from dit.qa.pages.main_page.components.balance_transfer_arm.balance_transfer_arm import BalanceTransferARM
+from dit.qa.pages.main_page.components.balance_transfer_arm.choose_element import ChooseElement
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
 from dit.qa.pages.main_page.components.drop_down_menu import DropDownMenus
 from dit.qa.pages.main_page.components.financing_objects.financing_objects import FinancingObjects
@@ -76,6 +79,12 @@ class MainPage(Page):
     )
     arm_aip_tab = Component(xpath='//span[text()="Рабочее место руководителя (АИП)"]')
     arm_aip = ARMAIP(css='[data-testid="Рабочее место руководителя (АИП)"]')
+    balance_transfer_arm_tab = Component(xpath='//span[text()="Передача на баланс: АРМ"]')
+    balance_transfer_arm = BalanceTransferARM(css='[data-testid="Передача на баланс: АРМ"]')
+    add_oi_modal = AddOI(css='[class*="x3-form-label-top"]')
+    choose_element_modal = ChooseElement(
+        xpath='//span[text()="Выбор элемента..."]/ancestor::div[contains(@class, "x3-window ")]'
+    )
 
     def is_loaders_hidden(self) -> bool:
         try:
@@ -485,6 +494,48 @@ class MainPage(Page):
                 assert self.arm_aip.objects_body.visible
 
                 return self.arm_aip.objects_body.rows[0].visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_balance_transfer_arm_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.balance_transfer_arm_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.balance_transfer_arm.panel.clear_filter.visible
+                assert self.balance_transfer_arm.panel.save.visible
+                assert self.balance_transfer_arm.panel.refresh.visible
+                assert self.balance_transfer_arm.panel.print.visible
+                assert self.balance_transfer_arm.panel.config_columns.visible
+                assert self.balance_transfer_arm.panel.create_oi.visible
+                assert self.balance_transfer_arm.panel.create_oaip.visible
+                assert self.balance_transfer_arm.panel.choose_color.visible
+                assert self.balance_transfer_arm.panel.copy_oi.visible
+                assert self.balance_transfer_arm.panel.comment.visible
+                assert self.balance_transfer_arm.panel.copy_values.visible
+                assert self.balance_transfer_arm.panel.transfer_oi.visible
+                assert self.balance_transfer_arm.panel.operations.visible
+                assert self.balance_transfer_arm.panel.scripts.visible
+                assert self.balance_transfer_arm.panel.info.visible
+
+                assert self.balance_transfer_arm.header.visible
+                assert self.balance_transfer_arm.body.visible
+                assert self.balance_transfer_arm.filter_btn.visible
+
+                return self.balance_transfer_arm.bottom.visible
 
             except NoSuchElementException:
 
