@@ -43,6 +43,7 @@ __all__ = [
     'close_choose_object',
     'close_add_object',
     'open_choose_organization',
+    'open_import_titles',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
@@ -54,6 +55,7 @@ __all__ = [
     'wait_arm_aip_tab',
     'wait_balance_transfer_tab',
     'wait_lots_register_tab',
+    'wait_titles_tab',
 ]
 
 
@@ -558,6 +560,21 @@ def open_choose_element(app: Application, field_name: str) -> None:
             raise TimeoutError('Choose element modal was not loaded') from e
 
 
+def open_import_titles(app: Application) -> None:
+    with allure.step('Opening Import titles modal'):
+        page = MainPage(app)
+
+        try:
+            page.titles.panel.import_btn.click()
+            page.import_titles_modal.wait_for_loading()
+
+            screenshot_attach(app, 'import_titles_modal')
+        except Exception as e:
+            screenshot_attach(app, 'import_titles_modal_error')
+
+            raise TimeoutError('Import titles modal was not loaded') from e
+
+
 def wait_auth_page(app: Application) -> None:
     with allure.step('Wait for loading Auth page'):
         try:
@@ -698,3 +715,15 @@ def wait_lots_register_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'lots_register_tab_error')
 
             raise TimeoutError('Lots register tab was not loaded') from e
+
+
+def wait_titles_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Titles tab'):
+        try:
+            MainPage(app).wait_titles_for_loading(login)
+
+            screenshot_attach(app, 'titles_tab')
+        except Exception as e:
+            screenshot_attach(app, 'titles_tab_error')
+
+            raise TimeoutError('Titles tab was not loaded') from e

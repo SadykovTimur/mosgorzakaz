@@ -32,6 +32,8 @@ from dit.qa.pages.main_page.components.organization.organization import Organiza
 from dit.qa.pages.main_page.components.organization.organizations import Organizations
 from dit.qa.pages.main_page.components.reports.reports import Reports, ReportsMenu
 from dit.qa.pages.main_page.components.reports.reports_queue import ReportsQueue
+from dit.qa.pages.main_page.components.titles.import_titles import ImportTitles
+from dit.qa.pages.main_page.components.titles.titles import Titles
 from dit.qa.pages.main_page.components.update_message import UpdateMessage
 
 __all__ = ['MainPage']
@@ -70,6 +72,7 @@ class MainPage(Page):
     )
     payment_modal = Payment(xpath='//div[text()="Платеж"]/ancestor::div[contains(@class,"x-window ")]')
     loaders = Components(css='[class*="mask-loading"]')
+    second_loaders = Components(css='[id*="loadmask"]')
     reports_tab = Component(xpath='//span[text()="Отчёты по показателям"]')
     reports = Reports(css='[data-testid="Отчёты по показателям"]')
     reports_queue_tab = Component(xpath='//span[text()="Очередь отчетов"]')
@@ -105,10 +108,19 @@ class MainPage(Page):
     organizations_modal = ChooseElement(
         xpath='//span[text()="Организации"]/ancestor::div[contains(@class, "x3-window ")]'
     )
+    titles_tab = Component(xpath='//span[text()="Титулы"]')
+    titles = Titles(css='[data-testid="Титулы"]')
+    import_titles_modal = ImportTitles(
+        xpath='//div[text()="Импорт Титулов (.dbf)"]/ancestor::div[contains(@class, "x-window ")]'
+    )
 
     def is_loaders_hidden(self) -> bool:
         try:
             for loader in self.loaders:
+                if loader.visible:
+                    return False
+
+            for loader in self.second_loaders:
                 if loader.visible:
                     return False
 
@@ -592,6 +604,41 @@ class MainPage(Page):
                 assert self.lots_register.filter_btn.visible
 
                 return self.lots_register.bottom.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_titles_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.titles_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.titles.panel.print.visible
+                assert self.titles.panel.import_btn.visible
+                assert self.titles.panel.export.visible
+                assert self.titles.panel.refresh.visible
+                assert self.titles.panel.clear_filter.visible
+                assert self.titles.panel.reset_config.visible
+                assert self.titles.panel.group.visible
+                assert self.titles.panel.sort.visible
+
+                assert self.titles.header.visible
+                assert self.titles.body.visible
+                assert self.titles.filter_btn.visible
+
+                return self.titles.bottom.visible
 
             except NoSuchElementException:
 
