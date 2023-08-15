@@ -1,14 +1,17 @@
 from typing import List
 
 from coms.qa.frontend.pages.component import Component, Components, ComponentWrapper
+from coms.qa.frontend.pages.component.button import Button
 from coms.qa.frontend.pages.component.text import Text
 
-__all__ = ['Fields', 'Field']
+__all__ = ['Fields', 'Field', 'FieldWrapper']
 
 
 class FieldWrapper(ComponentWrapper):
-    label = Text(css='[class*="x-form-item-label"]')
+    label = Text(tag='label')
     value_field = Component(tag='input')
+    search = Button(css='[class*="x3-form-search-trigger"]')
+    clear = Button(css='[class*="x3-form-clear-trigger"]')
 
 
 class Field(Component):

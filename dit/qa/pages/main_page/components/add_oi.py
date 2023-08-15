@@ -27,7 +27,7 @@ class Fields(Components):
 
 
 class AddOIWrapper(ComponentWrapper):
-    title = Text(class_name='x3-window-header-text')
+    title = Component(class_name='x3-window-header-text')
     close = Button(css='[class*="x3-tool-close"]')
     save = Button(css='[class*="icon-accept"]')
     fields = Fields(class_name='x3-form-item ')
@@ -55,7 +55,7 @@ class AddOIWrapper(ComponentWrapper):
     def wait_for_loading(self) -> None:
         def condition() -> bool:
             try:
-                assert self.title == 'Добавить объект имущества'
+                assert self.title.visible
                 assert self.close.visible
                 assert self.save.visible
 

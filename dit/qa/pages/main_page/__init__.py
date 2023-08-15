@@ -7,10 +7,10 @@ from coms.qa.frontend.pages.component.button import Button
 from coms.qa.frontend.pages.component.text import Text
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
+from dit.qa.pages.main_page.components.add_oi import AddOI
 from dit.qa.pages.main_page.components.arm_aip.arm_aip import ARMAIP
-from dit.qa.pages.main_page.components.balance_transfer_arm.add_oi import AddOI
 from dit.qa.pages.main_page.components.balance_transfer_arm.balance_transfer_arm import BalanceTransferARM
-from dit.qa.pages.main_page.components.balance_transfer_arm.choose_element import ChooseElement
+from dit.qa.pages.main_page.components.choose_element import ChooseElement
 from dit.qa.pages.main_page.components.choose_org_form import ChooseOrgForm
 from dit.qa.pages.main_page.components.drop_down_menu import DropDownMenus
 from dit.qa.pages.main_page.components.financing_objects.financing_objects import FinancingObjects
@@ -19,6 +19,10 @@ from dit.qa.pages.main_page.components.footer import Footer
 from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoice import InventoryPaymentInvoice
 from dit.qa.pages.main_page.components.inventory_payment.inventory_payment_invoices import InventoryPaymentInvoices
 from dit.qa.pages.main_page.components.inventory_payment.payment import Payment
+from dit.qa.pages.main_page.components.lots_register.lots import Lots
+from dit.qa.pages.main_page.components.lots_register.lots_register import LotsRegister
+from dit.qa.pages.main_page.components.lots_register.purchase import Purchase
+from dit.qa.pages.main_page.components.lots_register.purchase_participant import PurchaseParticipant
 from dit.qa.pages.main_page.components.main_menu import MainMenu
 from dit.qa.pages.main_page.components.news import News
 from dit.qa.pages.main_page.components.objects_aip.add_object_aip import AddObjectAIP
@@ -81,9 +85,25 @@ class MainPage(Page):
     arm_aip = ARMAIP(css='[data-testid="Рабочее место руководителя (АИП)"]')
     balance_transfer_arm_tab = Component(xpath='//span[text()="Передача на баланс: АРМ"]')
     balance_transfer_arm = BalanceTransferARM(css='[data-testid="Передача на баланс: АРМ"]')
-    add_oi_modal = AddOI(css='[class*="x3-form-label-top"]')
+    add_oi_modal = AddOI(
+        xpath='//span[text()="Добавить объект имущества"]/ancestor::div[contains(@class, "x3-window ")]'
+    )
     choose_element_modal = ChooseElement(
         xpath='//span[text()="Выбор элемента..."]/ancestor::div[contains(@class, "x3-window ")]'
+    )
+    lots_register_tab = Component(xpath='//span[text()="Реестр лотов"]')
+    lots_register = LotsRegister(css='[data-testid="Реестр лотов"]')
+    lots_modal = Lots(xpath='//span[text()="Лоты"]/ancestor::div[contains(@class, "x3-window ")]')
+    purchase_modal = Purchase(xpath='//span[text()="Закупка"]/ancestor::div[contains(@class, "x3-window ")]')
+    objects_modal = AddOI(xpath='//span[text()="Объекты"]/ancestor::div[contains(@class, "x3-form-label-top")]')
+    objects_aip_modal = ChooseElement(
+        xpath='//span[text()="Объекты АИП"]/ancestor::div[contains(@class, "x3-window ")]'
+    )
+    purchase_participant_modal = PurchaseParticipant(
+        xpath='//span[text()="Участник закупки"]/ancestor::div[contains(@class, "x3-window ")]'
+    )
+    organizations_modal = ChooseElement(
+        xpath='//span[text()="Организации"]/ancestor::div[contains(@class, "x3-window ")]'
     )
 
     def is_loaders_hidden(self) -> bool:
@@ -536,6 +556,42 @@ class MainPage(Page):
                 assert self.balance_transfer_arm.filter_btn.visible
 
                 return self.balance_transfer_arm.bottom.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_lots_register_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.lots_register_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.lots_register.panel.add.visible
+                assert self.lots_register.panel.refresh.visible
+                assert self.lots_register.panel.print.visible
+                assert self.lots_register.panel.clear_filter.visible
+                assert self.lots_register.panel.reset_config.visible
+                assert self.lots_register.panel.object_aip.visible
+                assert self.lots_register.panel.program_aip.visible
+                assert self.lots_register.panel.status.visible
+                assert self.lots_register.panel.sort.visible
+
+                assert self.lots_register.header.visible
+                assert self.lots_register.body.visible
+                assert self.lots_register.filter_btn.visible
+
+                return self.lots_register.bottom.visible
 
             except NoSuchElementException:
 

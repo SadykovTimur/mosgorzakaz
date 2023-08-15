@@ -3,29 +3,11 @@ from typing import List
 from coms.qa.core.helpers import wait_for
 from coms.qa.frontend.pages.component import Component, Components, ComponentWrapper
 from coms.qa.frontend.pages.component.button import Button
-from coms.qa.frontend.pages.component.text import Text
 from coms.qa.frontend.pages.component.text_field import TextField
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 
 __all__ = ['ChooseElement']
-
-
-class FieldWrapper(ComponentWrapper):
-    title = Text(tag='label')
-    input = TextField(tag='input')
-    search = Button(css='[class*="x3-form-search-trigger"]')
-    clear = Button(css='[class*="x3-form-clear-trigger"]')
-
-
-class Fields(Components):
-    def __get__(self, instance, owner) -> List[FieldWrapper]:
-        ret: List[FieldWrapper] = []
-
-        for webelement in self.finds(instance):
-            ret.append(FieldWrapper(instance.app, webelement, self._locator))
-
-        return ret
 
 
 class BodyWrapper(ComponentWrapper):
@@ -49,7 +31,7 @@ class Body(Components):
 
 
 class ChooseElementWrapper(ComponentWrapper):
-    title = Text(class_name='x3-window-header-text')
+    title = Component(class_name='x3-window-header-text')
     close = Button(css='[class*="x3-tool-close"]')
     maximize = Button(css='[class*="x3-tool-maximize"]')
     choose = Button(css='[class*="icon-accept"]')
@@ -65,7 +47,7 @@ class ChooseElementWrapper(ComponentWrapper):
     def wait_for_loading(self) -> None:
         def condition() -> bool:
             try:
-                assert self.title == 'Выбор элемента...'
+                assert self.title.visible
                 assert self.close.visible
                 assert self.maximize.visible
                 assert self.choose.visible

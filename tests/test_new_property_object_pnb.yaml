@@ -1,4 +1,4 @@
-name: 'Заведение нового объекта имущества в ПНБ и открытие АРМ ПНБ '
+name: 'Заведение нового объекта имущества в ПНБ и открытие АРМ ПНБ'
 cmd: 'pytest --alluredir={allure_reports_path} tests/test_new_property_object_pnb.py'
 steps:
   - 'Открытие стартовой страницы'

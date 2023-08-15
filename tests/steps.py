@@ -33,6 +33,16 @@ __all__ = [
     'choose_program',
     'choose_subprogram',
     'choose_element',
+    'open_lots',
+    'open_purchase',
+    'close_purchase',
+    'open_edit_lots_modal',
+    'open_add_object_to_lot',
+    'open_add_participant_to_lot',
+    'open_choose_object',
+    'close_choose_object',
+    'close_add_object',
+    'open_choose_organization',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
@@ -43,6 +53,7 @@ __all__ = [
     'wait_for_downloading_report',
     'wait_arm_aip_tab',
     'wait_balance_transfer_tab',
+    'wait_lots_register_tab',
 ]
 
 
@@ -361,6 +372,162 @@ def choose_element(app: Application, field_name: str, element_name: str) -> None
             raise TimeoutError('Choose element was not loaded') from e
 
 
+def open_lots(app: Application) -> None:
+    with allure.step('Opening lots modal'):
+        page = MainPage(app)
+
+        try:
+            page.lots_register.panel.add.click()
+            page.lots_modal.wait_for_loading()
+
+            screenshot_attach(app, 'lots_modal')
+        except Exception as e:
+            screenshot_attach(app, 'lots_modal_error')
+
+            raise TimeoutError('Lots modal was not loaded') from e
+
+
+def open_purchase(app: Application) -> None:
+    with allure.step('Opening Purchase modal'):
+        page = MainPage(app)
+
+        try:
+            page.lots_modal.purchase.click()
+            page.purchase_modal.wait_for_loading()
+
+            screenshot_attach(app, 'purchase_modal')
+        except Exception as e:
+            screenshot_attach(app, 'purchase_modal_error')
+
+            raise TimeoutError('Purchase modal was not loaded') from e
+
+
+def close_purchase(app: Application) -> None:
+    with allure.step('Closing Purchase modal'):
+        page = MainPage(app)
+
+        try:
+            page.purchase_modal.close.click()
+            page.purchase_modal.wait_for_invisibility()
+
+            screenshot_attach(app, 'purchase_modal')
+        except Exception as e:
+            screenshot_attach(app, 'purchase_modal_error')
+
+            raise TimeoutError('Purchase modal was not closed') from e
+
+
+def open_edit_lots_modal(app: Application) -> None:
+    with allure.step('Opening Lots modal'):
+        page = MainPage(app)
+
+        try:
+            page.lots_modal.close.click()
+            page.lots_modal.wait_for_invisibility()
+
+            row = page.lots_register.body.rows[0]
+            lot_number = row.lot_number
+            row.edit.click()
+
+            page.lots_modal.wait_for_loading(lot_number)
+
+            screenshot_attach(app, 'lots_modal')
+        except Exception as e:
+            screenshot_attach(app, 'lots_modal_error')
+
+            raise TimeoutError('Lots modal was not loaded') from e
+
+
+def open_add_object_to_lot(app: Application) -> None:
+    with allure.step('Opening Add object to lot modal'):
+        page = MainPage(app)
+
+        try:
+            page.lots_modal.open_add_object()
+            page.objects_modal.wait_for_loading()
+
+            screenshot_attach(app, 'add_object_to_lot_modal')
+        except Exception as e:
+            screenshot_attach(app, 'add_object_to_lot_modal_error')
+
+            raise TimeoutError('Add object to lot modal was not loaded') from e
+
+
+def close_add_object(app: Application) -> None:
+    with allure.step('Closing Add object to lot modal'):
+        page = MainPage(app)
+
+        try:
+            page.objects_modal.close.click()
+            page.objects_modal.wait_for_invisibility()
+
+            screenshot_attach(app, 'add_object_to_lot_modal')
+        except Exception as e:
+            screenshot_attach(app, 'add_object_to_lot_modal_error')
+
+            raise TimeoutError('Add object to lot modal was not closed') from e
+
+
+def open_choose_object(app: Application) -> None:
+    with allure.step('Opening Choose object modal'):
+        page = MainPage(app)
+
+        try:
+            page.objects_modal.choose_field('Объект АИП:').search.click()
+            page.objects_aip_modal[-1].wait_for_loading()
+
+            screenshot_attach(app, 'choose_object_modal')
+        except Exception as e:
+            screenshot_attach(app, 'choose_object_modal_error')
+
+            raise TimeoutError('Choose object modal was not loaded') from e
+
+
+def close_choose_object(app: Application) -> None:
+    with allure.step('Closing Choose object modal'):
+        page = MainPage(app)
+
+        try:
+            page.objects_aip_modal[-1].close.click()
+            page.objects_aip_modal[-1].wait_for_invisibility()
+
+            screenshot_attach(app, 'choose_object_modal')
+        except Exception as e:
+            screenshot_attach(app, 'choose_object_modal_error')
+
+            raise TimeoutError('Choose object modal was not closed') from e
+
+
+def open_add_participant_to_lot(app: Application) -> None:
+    with allure.step('Opening Add participant to lot modal'):
+        page = MainPage(app)
+
+        try:
+            page.lots_modal.open_add_participant()
+            page.purchase_participant_modal.wait_for_loading()
+
+            screenshot_attach(app, 'add_participant_to_lot_modal')
+        except Exception as e:
+            screenshot_attach(app, 'add_participant_to_lot_modal_error')
+
+            raise TimeoutError('Add participant to lot modal was not loaded') from e
+
+
+def open_choose_organization(app: Application) -> None:
+    with allure.step('Opening Choose organization modal'):
+        page = MainPage(app)
+
+        try:
+            page.purchase_participant_modal.choose_field('Организация:').search.click()
+            page.organizations_modal[-1].wait_for_loading()
+
+            screenshot_attach(app, 'choose_organization_modal')
+        except Exception as e:
+            screenshot_attach(app, 'choose_organization_modal_error')
+
+            raise TimeoutError('Choose organization modal was not loaded') from e
+
+
 def open_add_property_object(app: Application) -> None:
     with allure.step('Opening Add property object modal'):
         page = MainPage(app)
@@ -519,3 +686,15 @@ def wait_balance_transfer_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'balance_transfer_arm_tab_error')
 
             raise TimeoutError('Balance transfer ARM tab was not loaded') from e
+
+
+def wait_lots_register_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Lots register tab'):
+        try:
+            MainPage(app).wait_lots_register_for_loading(login)
+
+            screenshot_attach(app, 'lots_register_tab')
+        except Exception as e:
+            screenshot_attach(app, 'lots_register_tab_error')
+
+            raise TimeoutError('Lots register tab was not loaded') from e

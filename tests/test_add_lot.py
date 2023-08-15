@@ -7,15 +7,22 @@ from coms.qa.fixtures.application import Application
 from coms.qa.frontend.constants import CLIENT_BROWSERS, CLIENT_DEVICE_TYPE
 
 from tests.steps import (
-    choose_element,
-    open_add_property_object,
+    close_add_object,
+    close_choose_object,
+    close_purchase,
+    open_add_object_to_lot,
+    open_add_participant_to_lot,
     open_auth_page,
-    open_choose_element,
+    open_choose_object,
+    open_choose_organization,
+    open_edit_lots_modal,
+    open_lots,
+    open_purchase,
     open_section,
     sign_in,
     wait_and_close_modals,
     wait_auth_page,
-    wait_balance_transfer_tab,
+    wait_lots_register_tab,
     wait_main_page,
 )
 
@@ -24,13 +31,11 @@ from tests.steps import (
 @allure.label('component', 'DIT')
 @allure.epic('Mosgorzakaz Interface')
 @allure.story('Главная страница')
-@allure.title('Заведение нового объекта имущества в ПНБ и открытие АРМ ПНБ')
+@allure.title('Доступность добавления лота')
 @allure.severity(allure.severity_level.BLOCKER)
 @pytest.mark.parametrize('browser', CLIENT_BROWSERS)
 @pytest.mark.parametrize('device_type', CLIENT_DEVICE_TYPE)
-def test_new_property_object_pnb(
-    request: FixtureRequest, make_app: Callable[..., Application], browser: str, device_type: str
-) -> None:
+def test_add_lot(request: FixtureRequest, make_app: Callable[..., Application], browser: str, device_type: str) -> None:
     username = request.config.option.username
 
     app = make_app(browser, device_type)
@@ -43,13 +48,18 @@ def test_new_property_object_pnb(
 
     wait_and_close_modals(app)
 
-    open_section(app, 'Передача на баланс', 'АРМ')
-    wait_balance_transfer_tab(app, username)
+    open_section(app, 'Закупки', 'Реестр лотов')
+    wait_lots_register_tab(app, username)
 
-    open_add_property_object(app)
+    open_lots(app)
+    open_purchase(app)
+    close_purchase(app)
 
-    open_choose_element(app, 'Наименование:')
-    choose_element(app, 'Наименование:', 'ДИТ_автотест')
+    open_edit_lots_modal(app)
+    open_add_object_to_lot(app)
+    open_choose_object(app)
+    close_choose_object(app)
+    close_add_object(app)
 
-    open_choose_element(app, 'Объект АИП:')
-    choose_element(app, 'Объект АИП:', 'ОВД района Сокол . Типовой проект с переработкой.')
+    open_add_participant_to_lot(app)
+    open_choose_organization(app)
