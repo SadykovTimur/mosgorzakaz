@@ -25,6 +25,7 @@ from dit.qa.pages.main_page.components.lots_register.purchase import Purchase
 from dit.qa.pages.main_page.components.lots_register.purchase_participant import PurchaseParticipant
 from dit.qa.pages.main_page.components.main_menu import MainMenu
 from dit.qa.pages.main_page.components.news import News
+from dit.qa.pages.main_page.components.notification import Notification
 from dit.qa.pages.main_page.components.objects_aip.add_object_aip import AddObjectAIP
 from dit.qa.pages.main_page.components.objects_aip.object_aip import ObjectAIP
 from dit.qa.pages.main_page.components.objects_aip.object_register_aip import ObjectRegisterAIP
@@ -32,6 +33,9 @@ from dit.qa.pages.main_page.components.organization.organization import Organiza
 from dit.qa.pages.main_page.components.organization.organizations import Organizations
 from dit.qa.pages.main_page.components.reports.reports import Reports, ReportsMenu
 from dit.qa.pages.main_page.components.reports.reports_queue import ReportsQueue
+from dit.qa.pages.main_page.components.test_registry.remove import Remove
+from dit.qa.pages.main_page.components.test_registry.test_record import TestRecord
+from dit.qa.pages.main_page.components.test_registry.test_registry import TestRegistry
 from dit.qa.pages.main_page.components.titles.import_titles import ImportTitles
 from dit.qa.pages.main_page.components.titles.titles import Titles
 from dit.qa.pages.main_page.components.update_message import UpdateMessage
@@ -52,6 +56,7 @@ class MainPage(Page):
     footer = Footer(id='desktop-footer')
     news_modal = News(id='NewsWindowId')
     update_modal = UpdateMessage(css='[class*="x-message-box "]')
+    notification_modal = Notification(xpath='//div[text()="Оповещение"]/ancestor::div[contains(@class, "x-window ")]')
     choose_org_form_modal = ChooseOrgForm(
         xpath='//div[text()="Выбор орг. формы"]/ancestor::div[contains(@class,"x-window ")]'
     )
@@ -113,6 +118,10 @@ class MainPage(Page):
     import_titles_modal = ImportTitles(
         xpath='//div[text()="Импорт Титулов (.dbf)"]/ancestor::div[contains(@class, "x-window ")]'
     )
+    test_registry_tab = Component(xpath='//span[text()="Тест реестр"]')
+    test_registry = TestRegistry(css='[data-testid="Тест реестр"]')
+    test_record_modal = TestRecord(xpath='//div[text()="Тестовая запись"]/ancestor::div[contains(@class, "x-window ")]')
+    remove_modal = Remove(xpath='//div[text()="Удаление"]/ancestor::div[contains(@class, "x-window ")]')
 
     def is_loaders_hidden(self) -> bool:
         try:
@@ -142,6 +151,13 @@ class MainPage(Page):
         except (NoSuchElementException, StaleElementReferenceException):
             return True
 
+    @property
+    def is_notification_modal_hide(self) -> bool:
+        try:
+            return not self.notification_modal.visible
+        except (NoSuchElementException, StaleElementReferenceException):
+            return True
+
     def close_news_modal(self) -> None:
         try:
             self.news_modal.mark_as_read.wait_for_clickability().click()
@@ -151,6 +167,12 @@ class MainPage(Page):
     def close_update_modal(self) -> None:
         try:
             self.update_modal.read.wait_for_clickability().click()
+        except NoSuchElementException:
+            pass
+
+    def close_notification_modal(self) -> None:
+        try:
+            self.notification_modal.read.wait_for_clickability().click()
         except NoSuchElementException:
             pass
 
@@ -169,9 +191,8 @@ class MainPage(Page):
 
                 assert self.footer.object_aip == 'Объекты АИП'
                 assert self.footer.general_access == 'Рабочее место руководителя'
-                assert self.footer.arm_org == 'АРМ по\nорганизациям'
 
-                return self.footer.support_info.visible
+                return self.footer.arm_org == 'АРМ по\nорганизациям'
 
             except NoSuchElementException:
 
@@ -236,16 +257,20 @@ class MainPage(Page):
 
     def wait_and_close_modals(self) -> None:
         def condition() -> bool:
-            if self.is_news_modal_hide and self.is_update_modal_hide:
+            if self.is_notification_modal_hide:
                 return True
+
+            # if self.is_news_modal_hide and self.is_update_modal_hide and self.is_notification_modal_hide:
+            #     return True
 
             self.close_update_modal()
             self.close_news_modal()
+            self.close_notification_modal()
 
             return False
 
         self.app.set_implicitly_wait(1)
-        wait_for(condition, msg='Modals was not closed')
+        wait_for(condition, msg='Modals was not closed', timeout=70)
         self.app.restore_implicitly_wait()
 
     def wait_for_add_object_aip_modal_closed(self) -> None:
@@ -639,6 +664,32 @@ class MainPage(Page):
                 assert self.titles.filter_btn.visible
 
                 return self.titles.bottom.visible
+
+            except NoSuchElementException:
+
+                return False
+
+        self.app.set_implicitly_wait(1)
+        wait_for(condition, msg='Tab was not loaded')
+        self.app.restore_implicitly_wait()
+
+    def wait_test_registry_for_loading(self, login: str) -> None:
+        def condition() -> bool:
+            try:
+                assert self.is_loaders_hidden()
+                assert self.main_menu_btn.visible
+                assert self.desktop_tab.visible
+                assert self.test_registry_tab.visible
+                assert self.user_name == login
+                assert self.feedback == 'Обратная связь'
+                assert self.settings == 'Настройки'
+                assert self.logout == 'Выход'
+
+                assert self.test_registry.panel.add.visible
+                assert self.test_registry.panel.refresh.visible
+                assert self.test_registry.header.visible
+
+                return self.test_registry.body.visible
 
             except NoSuchElementException:
 

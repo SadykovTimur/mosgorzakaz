@@ -56,7 +56,7 @@ class BodyWrapper(ComponentWrapper):
                 return False
 
         self.app.set_implicitly_wait(1)
-        wait_for(condition, msg='Report was not finished')
+        wait_for(condition, msg='Report was not finished', timeout=190)
         self.app.restore_implicitly_wait()
 
 

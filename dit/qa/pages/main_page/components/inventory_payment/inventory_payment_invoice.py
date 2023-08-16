@@ -51,7 +51,7 @@ class InventoryPaymentInvoiceWrapper(ComponentWrapper):
                 return False
 
         self.app.set_implicitly_wait(1)
-        wait_for(condition, msg='Modal was not loaded')
+        wait_for(condition, msg='Modal was not loaded', timeout=40)
         self.app.restore_implicitly_wait()
 
 

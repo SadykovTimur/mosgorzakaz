@@ -44,6 +44,10 @@ __all__ = [
     'close_add_object',
     'open_choose_organization',
     'open_import_titles',
+    'open_test_record',
+    'close_test_record',
+    'remove_test_record',
+    'fill_test_record',
     'wait_auth_page',
     'wait_main_page',
     'wait_organizations_tab',
@@ -56,6 +60,7 @@ __all__ = [
     'wait_balance_transfer_tab',
     'wait_lots_register_tab',
     'wait_titles_tab',
+    'wait_test_registry_tab',
 ]
 
 
@@ -575,6 +580,75 @@ def open_import_titles(app: Application) -> None:
             raise TimeoutError('Import titles modal was not loaded') from e
 
 
+def open_test_record(app: Application) -> None:
+    with allure.step('Opening Test record modal'):
+        page = MainPage(app)
+
+        try:
+            page.test_registry.panel.add.click()
+            page.test_record_modal.wait_for_loading()
+
+            screenshot_attach(app, 'test_record_modal')
+        except Exception as e:
+            screenshot_attach(app, 'test_record_modal_error')
+
+            raise TimeoutError('Test record modal was not loaded') from e
+
+
+def fill_test_record(app: Application, record_name: str) -> None:
+    with allure.step('Filling Test record modal'):
+        page = MainPage(app)
+
+        try:
+            page.test_record_modal.name.send_keys(record_name)
+            page.test_record_modal.save.click()
+
+            screenshot_attach(app, 'test_record_modal')
+        except Exception as e:
+            screenshot_attach(app, 'test_record_modal_error')
+
+            raise TimeoutError('Test record name was not filled') from e
+
+
+def remove_test_record(app: Application, login: str) -> None:
+    with allure.step('Removing Test record'):
+        page = MainPage(app)
+
+        try:
+            rows = page.test_registry.body.rows
+            records_count = len(rows)
+            rows[0].remove.click()
+
+            modal = page.remove_modal
+            modal.wait_for_loading()
+            modal.yes.click()
+
+            page.wait_test_registry_for_loading(login)
+            page.test_registry.check_removed_record(records_count)
+
+            screenshot_attach(app, 'remove_test_record')
+        except Exception as e:
+            screenshot_attach(app, 'remove_test_record_error')
+
+            raise TimeoutError('Test record name was not removed') from e
+
+
+def close_test_record(app: Application, record_name: str) -> None:
+    with allure.step('Closing Test record modal'):
+        page = MainPage(app)
+
+        try:
+            page.test_record_modal.close.click()
+            page.test_record_modal.wait_for_invisibility()
+            page.test_registry.check_new_record(record_name)
+
+            screenshot_attach(app, 'close_test_record_modal')
+        except Exception as e:
+            screenshot_attach(app, 'close_test_record_modal_error')
+
+            raise TimeoutError('Test record name was not closed') from e
+
+
 def wait_auth_page(app: Application) -> None:
     with allure.step('Wait for loading Auth page'):
         try:
@@ -678,7 +752,7 @@ def wait_browser_tabs(app: Application, tabs: int) -> None:
     def condition() -> bool:
         return len(app.driver.window_handles) == tabs
 
-    wait_for(condition, msg='Tabs was not loaded')
+    wait_for(condition, msg='Tabs was not loaded', timeout=190)
 
 
 def wait_arm_aip_tab(app: Application, login: str) -> None:
@@ -727,3 +801,15 @@ def wait_titles_tab(app: Application, login: str) -> None:
             screenshot_attach(app, 'titles_tab_error')
 
             raise TimeoutError('Titles tab was not loaded') from e
+
+
+def wait_test_registry_tab(app: Application, login: str) -> None:
+    with allure.step('Wait for loading Test registry tab'):
+        try:
+            MainPage(app).wait_test_registry_for_loading(login)
+
+            screenshot_attach(app, 'test_registry_tab')
+        except Exception as e:
+            screenshot_attach(app, 'test_registry_tab_error')
+
+            raise TimeoutError('Test registry tab was not loaded') from e

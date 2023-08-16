@@ -25,7 +25,7 @@ from tests.steps import (
 @allure.label('component', 'DIT')
 @allure.epic('Mosgorzakaz Interface')
 @allure.story('Главная страница')
-@allure.title('Добавление новой организации в справочник')
+@allure.title('Доступность добавления описи счетов на оплату')
 @allure.severity(allure.severity_level.BLOCKER)
 @pytest.mark.parametrize('browser', CLIENT_BROWSERS)
 @pytest.mark.parametrize('device_type', CLIENT_DEVICE_TYPE)

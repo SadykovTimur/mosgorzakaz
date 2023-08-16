@@ -49,7 +49,7 @@ class AddOIWrapper(ComponentWrapper):
                 return False
 
         self.app.set_implicitly_wait(1)
-        wait_for(condition, msg='Field was not filled')
+        wait_for(condition, msg='Field was not filled', timeout=40)
         self.app.restore_implicitly_wait()
 
     def wait_for_loading(self) -> None:

@@ -1,4 +1,5 @@
 from typing import Callable
+from uuid import uuid4
 
 import allure
 import pytest
@@ -7,14 +8,17 @@ from coms.qa.fixtures.application import Application
 from coms.qa.frontend.constants import CLIENT_BROWSERS, CLIENT_DEVICE_TYPE
 
 from tests.steps import (
+    close_test_record,
+    fill_test_record,
     open_auth_page,
-    open_import_titles,
     open_section,
+    open_test_record,
+    remove_test_record,
     sign_in,
     wait_and_close_modals,
     wait_auth_page,
     wait_main_page,
-    wait_titles_tab,
+    wait_test_registry_tab,
 )
 
 
@@ -22,12 +26,15 @@ from tests.steps import (
 @allure.label('component', 'DIT')
 @allure.epic('Mosgorzakaz Interface')
 @allure.story('Главная страница')
-@allure.title('Проверка интеграции по титулам')
+@allure.title('Добавление тестовой записи')
 @allure.severity(allure.severity_level.BLOCKER)
 @pytest.mark.parametrize('browser', CLIENT_BROWSERS)
 @pytest.mark.parametrize('device_type', CLIENT_DEVICE_TYPE)
-def test_titles(request: FixtureRequest, make_app: Callable[..., Application], browser: str, device_type: str) -> None:
+def test_test_registry(
+    request: FixtureRequest, make_app: Callable[..., Application], browser: str, device_type: str
+) -> None:
     username = request.config.option.username
+    record_name = f'Тест{uuid4().hex[:8]}'
 
     app = make_app(browser, device_type)
 
@@ -39,7 +46,11 @@ def test_titles(request: FixtureRequest, make_app: Callable[..., Application], b
 
     wait_and_close_modals(app)
 
-    open_section(app, 'Финансовая система', 'Титулы')
-    wait_titles_tab(app, username)
+    open_section(app, 'Администрирование', 'Тест страница')
+    wait_test_registry_tab(app, username)
 
-    open_import_titles(app)
+    open_test_record(app)
+    fill_test_record(app, record_name)
+    close_test_record(app, record_name)
+
+    remove_test_record(app, username)
