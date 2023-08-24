@@ -1,5 +1,5 @@
 name: 'Выгрузка отчета ТДЦ с указанием фильтра'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_download_tdc_report_with_filter.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_download_tdc_report_with_filter.py --user=DITTestUserPM6 --password=B2tGgB'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'

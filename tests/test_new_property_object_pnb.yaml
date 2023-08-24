@@ -1,5 +1,5 @@
 name: 'Заведение нового объекта имущества в ПНБ и открытие АРМ ПНБ'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_new_property_object_pnb.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_new_property_object_pnb.py --user=DITTestUserPM7 --password=ogAiPv'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'

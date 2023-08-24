@@ -1,5 +1,5 @@
 name: 'Выгрузка отчёта из системы показателей'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_download_report.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_download_report.py --user=DITTestUserPM5 --password=6sIEC2'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'

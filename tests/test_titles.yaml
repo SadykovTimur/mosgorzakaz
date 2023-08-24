@@ -1,5 +1,5 @@
 name: 'Проверка интеграции по титулам'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_titles.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_titles.py --user=DITTestUserPM9 --password=2Q4UGu'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'

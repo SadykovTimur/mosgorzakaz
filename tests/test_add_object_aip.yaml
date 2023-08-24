@@ -1,5 +1,5 @@
 name: 'Доступность добавления карточки объекта АИП'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_add_object_aip.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_add_object_aip.py --user=DITTestUserPM2 --password=wkDsU4'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'

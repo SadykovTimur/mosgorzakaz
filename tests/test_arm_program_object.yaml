@@ -1,5 +1,5 @@
 name: 'Вход в АРМ и переход до уровня объекта'
-cmd: 'pytest --alluredir={allure_reports_path} tests/test_arm_program_object.py'
+cmd: 'pytest --alluredir={allure_reports_path} tests/test_arm_program_object.py --user=DITTestUserPM4 --password=kZMla3'
 steps:
   - 'Открытие стартовой страницы'
   - 'Внесение авторизационных данных, нажатие на кнопку "Войти"'
