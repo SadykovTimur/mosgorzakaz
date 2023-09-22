@@ -52,7 +52,8 @@ class MainPage(Page):
     settings = Text(id='settingsButton')
     logout = Text(id='logOutButton')
     tasks_status = Component(xpath='//div[text()="Состояние задач"]')
-    tasks_control = Component(xpath='//div[text()="Контроль задач"]')
+    control = Component(css='[tabid="Контроль"]')
+    employment = Component(css='[tabid="Занятость"]')
     footer = Footer(id='desktop-footer')
     news_modal = News(id='NewsWindowId')
     update_modal = UpdateMessage(css='[class*="x-message-box "]')
@@ -187,7 +188,8 @@ class MainPage(Page):
                 assert self.settings == 'Настройки'
                 assert self.logout == 'Выход'
                 assert self.tasks_status.visible
-                assert self.tasks_control.visible
+                assert self.control.visible
+                assert self.employment.visible
 
                 assert self.footer.object_aip == 'Объекты АИП'
                 assert self.footer.general_access == 'Рабочее место руководителя'
@@ -688,8 +690,9 @@ class MainPage(Page):
                 assert self.test_registry.panel.add.visible
                 assert self.test_registry.panel.refresh.visible
                 assert self.test_registry.header.visible
+                assert self.test_registry.body.visible
 
-                return self.test_registry.body.visible
+                return self.test_registry.footer.visible
 
             except NoSuchElementException:
 

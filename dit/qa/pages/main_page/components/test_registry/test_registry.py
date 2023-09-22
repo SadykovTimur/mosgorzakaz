@@ -48,12 +48,24 @@ class Body(Component):
         return BodyWrapper(instance.app, self.find(instance), self._locator)
 
 
+class FooterWrapper(ComponentWrapper):
+    last_page = Button(css='[data-qtip="Последняя страница"]')
+
+
+class Footer(Component):
+    def __get__(self, instance, owner) -> FooterWrapper:
+        return FooterWrapper(instance.app, self.find(instance), self._locator)
+
+
 class TestRegistryWrapper(ComponentWrapper):
     panel = Panel(css='[class*="x-toolbar-docked-top"]')
     header = Component(css='[class*="x-grid-header"]')
     body = Body(class_name='x-grid-item-container')
+    footer = Footer(css='[class*="x-docked-bottom"]')
 
     def check_new_record(self, record_name: str) -> None:
+        self.footer.last_page.click()
+
         def condition() -> bool:
             try:
                 return record_name in self.body.get_records_name()
