@@ -51,6 +51,10 @@ class Body(Component):
 class FooterWrapper(ComponentWrapper):
     last_page = Button(css='[data-qtip="Последняя страница"]')
 
+    @property
+    def is_last_page_active(self) -> bool:
+        return 'disabled' not in self.last_page.webelement.get_attribute('class')
+
 
 class Footer(Component):
     def __get__(self, instance, owner) -> FooterWrapper:
@@ -64,7 +68,8 @@ class TestRegistryWrapper(ComponentWrapper):
     footer = Footer(css='[class*="x-docked-bottom"]')
 
     def check_new_record(self, record_name: str) -> None:
-        self.footer.last_page.click()
+        if self.footer.is_last_page_active:
+            self.footer.last_page.click()
 
         def condition() -> bool:
             try:
